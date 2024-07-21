@@ -1,3 +1,6 @@
 [submodule "PYNQ"]
 	path = PYNQ
 	url = https://github.com/Xilinx/PYNQ.git
+[submodule "hdl"]
+	path = hdl
+	url = git@github.com:zehicks/hdl.git
