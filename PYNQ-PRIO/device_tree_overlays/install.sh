@@ -1,4 +1,3 @@
-
 read -d '' PACKAGES <<EOT
 libssl-dev
 flex
