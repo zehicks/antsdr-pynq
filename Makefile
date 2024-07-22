@@ -1,3 +1,6 @@
+SD ?=
+SD_MSG := "ERROR: SD is not set. Please provide the path to your SD card mount directory."
+
 all: base pynq sdimg dtbo
 
 base:
@@ -23,6 +26,15 @@ sdimg:
 dtbo:
 	$(MAKE) -C ./PYNQ-PRIO/device_tree_overlays BOARDS=e200
 
+sd:
+	@[ "${SD}" ] || ( echo $(SD_MSG); exit 1 )
+	sudo cp -f ./e200_boot_gen/build_sdimg/BOOT.bin $(SD)/PYNQ
+	sudo mkdir -p $(SD)/root/home/xilinx/jupyter_notebooks/base
+	sudo cp -f ./boards/e200/base/base.bit $(SD)/root/home/xilinx/jupyter_notebooks/base
+	sudo cp -f ./boards/e200/base/base.hwh $(SD)/root/home/xilinx/jupyter_notebooks/base
+	sudo cp -f ./boards/e200/base/pl.dtbo $(SD)/root/home/xilinx/jupyter_notebooks/base
+	sudo cp -f ./boards/e200/base/notebooks/pynq_iio.ipynb $(SD)/root/home/xilinx/jupyter_notebooks/base
+	
 clean: clean/base clean/pynq
 
 clean/base:
