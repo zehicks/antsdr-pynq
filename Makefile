@@ -29,6 +29,7 @@ dtbo:
 sd:
 	@[ "${SD}" ] || ( echo $(SD_MSG); exit 1 )
 	sudo cp -f ./e200_boot_gen/build_sdimg/BOOT.bin $(SD)/PYNQ
+	sudo cp -f ./boards/e200/utils/boot.py $(SD)/PYNQ
 	sudo mkdir -p $(SD)/root/home/xilinx/jupyter_notebooks/base
 	sudo cp -f ./boards/e200/base/base.bit $(SD)/root/home/xilinx/jupyter_notebooks/base
 	sudo cp -f ./boards/e200/base/base.hwh $(SD)/root/home/xilinx/jupyter_notebooks/base
