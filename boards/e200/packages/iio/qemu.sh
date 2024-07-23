@@ -24,8 +24,6 @@ apt update
 apt download $(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances libiio-dev | grep "^\w" | sort -u)
 apt download $(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances iiod | grep "^\w" | sort -u)
 dpkg -i *.deb
-# wget https://github.com/analogdevicesinc/libad9361-iio/releases/download/v0.3/ad9361-0.3-Linux-Ubuntu-arm32v7.deb
-# dpkg -i ad9361-0.3-Linux-Ubuntu-arm32v7.deb
 wget https://github.com/analogdevicesinc/libad9361-iio/archive/refs/tags/v0.3.zip
 unzip -d libad9361-iio v0.3.zip
 cd libad9361-iio/libad9361-iio-0.3
