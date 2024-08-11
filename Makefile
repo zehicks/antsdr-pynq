@@ -8,7 +8,7 @@ base:
 	cp ./boards/e200/base/antsdre200/antsdre200.runs/impl_1/system_top.bit ./boards/e200/base/base.bit
 	mkdir -p ./boards/e200/petalinux_bsp/hardware_project/ && cp ./boards/e200/base/antsdre200/antsdre200.sdk/system_top.xsa ./boards/e200/petalinux_bsp/hardware_project/base.xsa
 	cp ./boards/e200/base/antsdre200/antsdre200.gen/sources_1/bd/system/hw_handoff/system.hwh ./boards/e200/base/base.hwh
-	python3 ./boards/e200/notebooks/hwh_patch.py -f ./boards/e200/base/base.hwh
+	python3 ./boards/e200/utils/hwh_patch.py -f ./boards/e200/base/base.hwh
 	
 pynq/kernel:
 	rm -rf ./PYNQ/boards/e200
