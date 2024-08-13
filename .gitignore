@@ -8,6 +8,10 @@ boards/e200/petalinux_bsp/hardware_project/*.xsa
 !boards/e200/base/antsdre200/*.tcl
 !boards/e200/base/antsdre200/*.xdc
 
+# Boot Image
+e200_boot_gen/build_sdimg/BOOT.bin
+e200_boot_gen/system_top.bit
+
 # Overlay DTC sources
 PYNQ-PRIO/device_tree_overlays/dtc-1.4.4/
 
