@@ -21,6 +21,7 @@ pynq:
 	$(MAKE) -C ./PYNQ/sdbuild BOARDS=e200
 
 sdimg:
+	cp ./boards/e200/base/antsdre200/antsdre200.runs/impl_1/system_top.bit ./e200_boot_gen/system_top.bit
 	$(MAKE) -C ./e200_boot_gen sdimg
 
 dtbo:
