@@ -1,12 +1,12 @@
-# Base Vivado project files
-boards/e200/base/antsdre200/*
-boards/e200/base/base.hwh
-boards/e200/base/base.bit
+# Vivado project files
+boards/e200/*/antsdre200/*
+boards/e200/*/*.hwh
+boards/e200/*/*.bit
 boards/e200/petalinux_bsp/hardware_project/*.xsa
-!boards/e200/base/antsdre200/Makefile
-!boards/e200/base/antsdre200/*.v
-!boards/e200/base/antsdre200/*.tcl
-!boards/e200/base/antsdre200/*.xdc
+!boards/e200/*/antsdre200/Makefile
+!boards/e200/*/antsdre200/*.v
+!boards/e200/*/antsdre200/*.tcl
+!boards/e200/*/antsdre200/*.xdc
 
 # Boot Image
 e200_boot_gen/build_sdimg/BOOT.bin
