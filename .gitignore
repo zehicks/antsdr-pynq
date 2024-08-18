@@ -18,5 +18,6 @@ PYNQ-PRIO/device_tree_overlays/dtc-1.4.4/
 # Misc
 .vscode/
 *.bak
+*.fc32
 *.ic16
 *.hex
