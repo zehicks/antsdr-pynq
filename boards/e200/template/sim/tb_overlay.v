@@ -2,10 +2,10 @@
 
 module tb_overlay;
 
-    parameter FILE_PATH_I = "/home/hicksze1/antsdr-pynq/boards/e200/utils/tb_tones_I.hex";
-    parameter FILE_PATH_Q = "/home/hicksze1/antsdr-pynq/boards/e200/utils/tb_tones_Q.hex";
-    parameter CLK_PERIOD = 130; // ns
-    parameter SAMPLE_CLK_PERIOD = 520; // ns
+    parameter FILE_PATH_I = "";
+    parameter FILE_PATH_Q = "";
+    parameter CLK_PERIOD = 4; // ns
+    parameter SAMPLE_CLK_PERIOD = 1; // ns
 
     reg clk;
     reg reset_n;
