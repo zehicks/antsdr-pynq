@@ -3,7 +3,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 
-entity ol_top is
+entity overlay is
     port ( 
         i_clk : in std_logic;
         i_rst : in std_logic;
@@ -24,9 +24,9 @@ entity ol_top is
         o_Q1_data : out std_logic_vector(15 downto 0);
         o_Q1_valid : out std_logic
     );
-end ol_top;
+end overlay;
 
-architecture behavior of ol_top is
+architecture behavior of overlay is
 
     
     

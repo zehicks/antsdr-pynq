@@ -39,10 +39,10 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 
 # The design that will be created by this Tcl script contains the following 
-# module references:
-# ol_top
+# block design container source references:
+# overlay_top
 
-# Please add the sources of those modules before sourcing this Tcl script.
+# Please add the sources before sourcing this Tcl script.
 
 # If there is no project opened, this script will create a
 # project, but make sure you do not have an existing project
@@ -170,27 +170,40 @@ analog.com:user:util_tdd_sync:1.0\
 }
 
 ##################################################################
-# CHECK Modules
+# CHECK Block Design Container Sources
 ##################################################################
-set bCheckModules 1
-if { $bCheckModules == 1 } {
-   set list_check_mods "\ 
-ol_top\
+set bCheckSources 1
+set list_bdc_active "overlay_top"
+
+array set map_bdc_missing {}
+set map_bdc_missing(ACTIVE) ""
+set map_bdc_missing(BDC) ""
+
+if { $bCheckSources == 1 } {
+   set list_check_srcs "\ 
+overlay_top \
 "
 
-   set list_mods_missing ""
-   common::send_gid_msg -ssname BD::TCL -id 2020 -severity "INFO" "Checking if the following modules exist in the project's sources: $list_check_mods ."
+   common::send_gid_msg -ssname BD::TCL -id 2056 -severity "INFO" "Checking if the following sources for block design container exist in the project: $list_check_srcs .\n\n"
 
-   foreach mod_vlnv $list_check_mods {
-      if { [can_resolve_reference $mod_vlnv] == 0 } {
-         lappend list_mods_missing $mod_vlnv
+   foreach src $list_check_srcs {
+      if { [can_resolve_reference $src] == 0 } {
+         if { [lsearch $list_bdc_active $src] != -1 } {
+            set map_bdc_missing(ACTIVE) "$map_bdc_missing(ACTIVE) $src"
+         } else {
+            set map_bdc_missing(BDC) "$map_bdc_missing(BDC) $src"
+         }
       }
    }
 
-   if { $list_mods_missing ne "" } {
-      catch {common::send_gid_msg -ssname BD::TCL -id 2021 -severity "ERROR" "The following module(s) are not found in the project: $list_mods_missing" }
-      common::send_gid_msg -ssname BD::TCL -id 2022 -severity "INFO" "Please add source files for the missing module(s) above."
+   if { [llength $map_bdc_missing(ACTIVE)] > 0 } {
+      catch {common::send_gid_msg -ssname BD::TCL -id 2057 -severity "ERROR" "The following source(s) of Active variants are not found in the project: $map_bdc_missing(ACTIVE)" }
+      common::send_gid_msg -ssname BD::TCL -id 2060 -severity "INFO" "Please add source files for the missing source(s) above."
       set bCheckIPsPassed 0
+   }
+   if { [llength $map_bdc_missing(BDC)] > 0 } {
+      catch {common::send_gid_msg -ssname BD::TCL -id 2059 -severity "WARNING" "The following source(s) of variants are not found in the project: $map_bdc_missing(BDC)" }
+      common::send_gid_msg -ssname BD::TCL -id 2060 -severity "INFO" "Please add source files for the missing source(s) above."
    }
 }
 
@@ -203,97 +216,6 @@ if { $bCheckIPsPassed != 1 } {
 # DESIGN PROCs
 ##################################################################
 
-
-# Hierarchical cell: antsdr_pynq
-proc create_hier_cell_antsdr_pynq { parentCell nameHier } {
-
-  variable script_folder
-
-  if { $parentCell eq "" || $nameHier eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2092 -severity "ERROR" "create_hier_cell_antsdr_pynq() - Empty argument(s)!"}
-     return
-  }
-
-  # Get object for parentCell
-  set parentObj [get_bd_cells $parentCell]
-  if { $parentObj == "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
-     return
-  }
-
-  # Make sure parentObj is hier blk
-  set parentType [get_property TYPE $parentObj]
-  if { $parentType ne "hier" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
-     return
-  }
-
-  # Save current instance; Restore later
-  set oldCurInst [current_bd_instance .]
-
-  # Set parent object as current
-  current_bd_instance $parentObj
-
-  # Create cell and set as current instance
-  set hier_obj [create_bd_cell -type hier $nameHier]
-  current_bd_instance $hier_obj
-
-  # Create interface pins
-
-  # Create pins
-  create_bd_pin -dir I -from 15 -to 0 i_I0_data
-  create_bd_pin -dir I i_I0_valid
-  create_bd_pin -dir I -from 15 -to 0 i_I1_data
-  create_bd_pin -dir I i_I1_valid
-  create_bd_pin -dir I -from 15 -to 0 i_Q0_data
-  create_bd_pin -dir I i_Q0_valid
-  create_bd_pin -dir I -from 15 -to 0 i_Q1_data
-  create_bd_pin -dir I i_Q1_valid
-  create_bd_pin -dir I i_clk
-  create_bd_pin -dir I i_rst
-  create_bd_pin -dir O -from 15 -to 0 o_I0_data
-  create_bd_pin -dir O o_I0_valid
-  create_bd_pin -dir O -from 15 -to 0 o_I1_data
-  create_bd_pin -dir O o_I1_valid
-  create_bd_pin -dir O -from 15 -to 0 o_Q0_data
-  create_bd_pin -dir O o_Q0_valid
-  create_bd_pin -dir O -from 15 -to 0 o_Q1_data
-  create_bd_pin -dir O o_Q1_valid
-
-  # Create instance: ol_top_0, and set properties
-  set block_name ol_top
-  set block_cell_name ol_top_0
-  if { [catch {set ol_top_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $ol_top_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
-  # Create port connections
-  connect_bd_net -net i_I0_data_1 [get_bd_pins i_I0_data] [get_bd_pins ol_top_0/i_I0_data]
-  connect_bd_net -net i_I0_valid_1 [get_bd_pins i_I0_valid] [get_bd_pins ol_top_0/i_I0_valid]
-  connect_bd_net -net i_I1_data_1 [get_bd_pins i_I1_data] [get_bd_pins ol_top_0/i_I1_data]
-  connect_bd_net -net i_I1_valid_1 [get_bd_pins i_I1_valid] [get_bd_pins ol_top_0/i_I1_valid]
-  connect_bd_net -net i_Q0_data_1 [get_bd_pins i_Q0_data] [get_bd_pins ol_top_0/i_Q0_data]
-  connect_bd_net -net i_Q0_valid_1 [get_bd_pins i_Q0_valid] [get_bd_pins ol_top_0/i_Q0_valid]
-  connect_bd_net -net i_Q1_data_1 [get_bd_pins i_Q1_data] [get_bd_pins ol_top_0/i_Q1_data]
-  connect_bd_net -net i_Q1_valid_1 [get_bd_pins i_Q1_valid] [get_bd_pins ol_top_0/i_Q1_valid]
-  connect_bd_net -net i_clk_4x_1 [get_bd_pins i_clk] [get_bd_pins ol_top_0/i_clk]
-  connect_bd_net -net i_rst_1 [get_bd_pins i_rst] [get_bd_pins ol_top_0/i_rst]
-  connect_bd_net -net ol_top_0_o_I0_data [get_bd_pins o_I0_data] [get_bd_pins ol_top_0/o_I0_data]
-  connect_bd_net -net ol_top_0_o_I0_valid [get_bd_pins o_I0_valid] [get_bd_pins ol_top_0/o_I0_valid]
-  connect_bd_net -net ol_top_0_o_I1_data [get_bd_pins o_I1_data] [get_bd_pins ol_top_0/o_I1_data]
-  connect_bd_net -net ol_top_0_o_I1_valid [get_bd_pins o_I1_valid] [get_bd_pins ol_top_0/o_I1_valid]
-  connect_bd_net -net ol_top_0_o_Q0_data [get_bd_pins o_Q0_data] [get_bd_pins ol_top_0/o_Q0_data]
-  connect_bd_net -net ol_top_0_o_Q0_valid [get_bd_pins o_Q0_valid] [get_bd_pins ol_top_0/o_Q0_valid]
-  connect_bd_net -net ol_top_0_o_Q1_data [get_bd_pins o_Q1_data] [get_bd_pins ol_top_0/o_Q1_data]
-  connect_bd_net -net ol_top_0_o_Q1_valid [get_bd_pins o_Q1_valid] [get_bd_pins ol_top_0/o_Q1_valid]
-
-  # Restore current instance
-  current_bd_instance $oldCurInst
-}
 
 
 # Procedure to create entire design; Provide argument to make
@@ -399,9 +321,6 @@ proc create_root_design { parentCell } {
    CONFIG.CONST_WIDTH {1} \
  ] $GND_1
 
-  # Create instance: antsdr_pynq
-  create_hier_cell_antsdr_pynq [current_bd_instance .] antsdr_pynq
-
   # Create instance: axi_ad9361, and set properties
   set axi_ad9361 [ create_bd_cell -type ip -vlnv analog.com:user:axi_ad9361:1.0 axi_ad9361 ]
   set_property -dict [ list \
@@ -494,6 +413,17 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.ROM_ADDR_BITS {9} \
  ] $axi_sysid_0
+
+  # Create instance: overlay_top_0, and set properties
+  set overlay_top_0 [ create_bd_cell -type container -reference overlay_top overlay_top_0 ]
+  set_property -dict [ list \
+   CONFIG.ACTIVE_SIM_BD {overlay_top.bd} \
+   CONFIG.ACTIVE_SYNTH_BD {overlay_top.bd} \
+   CONFIG.ENABLE_DFX {0} \
+   CONFIG.LIST_SIM_BD {overlay_top.bd} \
+   CONFIG.LIST_SYNTH_BD {overlay_top.bd} \
+   CONFIG.LOCK_PROPAGATE {0} \
+ ] $overlay_top_0
 
   # Create instance: rom_sys_0, and set properties
   set rom_sys_0 [ create_bd_cell -type ip -vlnv analog.com:user:sysid_rom:1.0 rom_sys_0 ]
@@ -1032,28 +962,20 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
 
   # Create port connections
   connect_bd_net -net GND_1_dout [get_bd_pins GND_1/dout] [get_bd_pins sys_concat_intc/In0] [get_bd_pins sys_concat_intc/In1] [get_bd_pins sys_concat_intc/In2] [get_bd_pins sys_concat_intc/In3] [get_bd_pins sys_concat_intc/In4] [get_bd_pins sys_concat_intc/In5] [get_bd_pins sys_concat_intc/In6] [get_bd_pins sys_concat_intc/In7] [get_bd_pins sys_concat_intc/In8] [get_bd_pins sys_concat_intc/In9] [get_bd_pins sys_concat_intc/In10] [get_bd_pins sys_concat_intc/In15]
-  connect_bd_net -net antsdr_pynq_o_I0_data [get_bd_pins antsdr_pynq/o_I0_data] [get_bd_pins util_ad9361_adc_fifo/din_data_0]
-  connect_bd_net -net antsdr_pynq_o_I0_valid [get_bd_pins antsdr_pynq/o_I0_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_0]
-  connect_bd_net -net antsdr_pynq_o_I1_data [get_bd_pins antsdr_pynq/o_I1_data] [get_bd_pins util_ad9361_adc_fifo/din_data_2]
-  connect_bd_net -net antsdr_pynq_o_I1_valid [get_bd_pins antsdr_pynq/o_I1_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_2]
-  connect_bd_net -net antsdr_pynq_o_Q0_data [get_bd_pins antsdr_pynq/o_Q0_data] [get_bd_pins util_ad9361_adc_fifo/din_data_1]
-  connect_bd_net -net antsdr_pynq_o_Q0_valid [get_bd_pins antsdr_pynq/o_Q0_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_1]
-  connect_bd_net -net antsdr_pynq_o_Q1_data [get_bd_pins antsdr_pynq/o_Q1_data] [get_bd_pins util_ad9361_adc_fifo/din_data_3]
-  connect_bd_net -net antsdr_pynq_o_Q1_valid [get_bd_pins antsdr_pynq/o_Q1_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_3]
-  connect_bd_net -net axi_ad9361_adc_data_i0 [get_bd_pins antsdr_pynq/i_I0_data] [get_bd_pins axi_ad9361/adc_data_i0]
-  connect_bd_net -net axi_ad9361_adc_data_i1 [get_bd_pins antsdr_pynq/i_I1_data] [get_bd_pins axi_ad9361/adc_data_i1]
-  connect_bd_net -net axi_ad9361_adc_data_q0 [get_bd_pins antsdr_pynq/i_Q0_data] [get_bd_pins axi_ad9361/adc_data_q0]
-  connect_bd_net -net axi_ad9361_adc_data_q1 [get_bd_pins antsdr_pynq/i_Q1_data] [get_bd_pins axi_ad9361/adc_data_q1]
+  connect_bd_net -net axi_ad9361_adc_data_i0 [get_bd_pins axi_ad9361/adc_data_i0] [get_bd_pins overlay_top_0/i_I0_data]
+  connect_bd_net -net axi_ad9361_adc_data_i1 [get_bd_pins axi_ad9361/adc_data_i1] [get_bd_pins overlay_top_0/i_I1_data]
+  connect_bd_net -net axi_ad9361_adc_data_q0 [get_bd_pins axi_ad9361/adc_data_q0] [get_bd_pins overlay_top_0/i_Q0_data]
+  connect_bd_net -net axi_ad9361_adc_data_q1 [get_bd_pins axi_ad9361/adc_data_q1] [get_bd_pins overlay_top_0/i_Q1_data]
   connect_bd_net -net axi_ad9361_adc_dma_irq [get_bd_pins axi_ad9361_adc_dma/irq] [get_bd_pins sys_concat_intc/In13]
   connect_bd_net -net axi_ad9361_adc_enable_i0 [get_bd_pins axi_ad9361/adc_enable_i0] [get_bd_pins util_ad9361_adc_fifo/din_enable_0]
   connect_bd_net -net axi_ad9361_adc_enable_i1 [get_bd_pins axi_ad9361/adc_enable_i1] [get_bd_pins util_ad9361_adc_fifo/din_enable_2]
   connect_bd_net -net axi_ad9361_adc_enable_q0 [get_bd_pins axi_ad9361/adc_enable_q0] [get_bd_pins util_ad9361_adc_fifo/din_enable_1]
   connect_bd_net -net axi_ad9361_adc_enable_q1 [get_bd_pins axi_ad9361/adc_enable_q1] [get_bd_pins util_ad9361_adc_fifo/din_enable_3]
   connect_bd_net -net axi_ad9361_adc_r1_mode [get_bd_pins axi_ad9361/adc_r1_mode] [get_bd_pins util_ad9361_divclk_sel_concat/In0]
-  connect_bd_net -net axi_ad9361_adc_valid_i0 [get_bd_pins antsdr_pynq/i_I0_valid] [get_bd_pins axi_ad9361/adc_valid_i0]
-  connect_bd_net -net axi_ad9361_adc_valid_i1 [get_bd_pins antsdr_pynq/i_I1_valid] [get_bd_pins axi_ad9361/adc_valid_i1]
-  connect_bd_net -net axi_ad9361_adc_valid_q0 [get_bd_pins antsdr_pynq/i_Q0_valid] [get_bd_pins axi_ad9361/adc_valid_q0]
-  connect_bd_net -net axi_ad9361_adc_valid_q1 [get_bd_pins antsdr_pynq/i_Q1_valid] [get_bd_pins axi_ad9361/adc_valid_q1]
+  connect_bd_net -net axi_ad9361_adc_valid_i0 [get_bd_pins axi_ad9361/adc_valid_i0] [get_bd_pins overlay_top_0/i_I0_valid]
+  connect_bd_net -net axi_ad9361_adc_valid_i1 [get_bd_pins axi_ad9361/adc_valid_i1] [get_bd_pins overlay_top_0/i_I1_valid]
+  connect_bd_net -net axi_ad9361_adc_valid_q0 [get_bd_pins axi_ad9361/adc_valid_q0] [get_bd_pins overlay_top_0/i_Q0_valid]
+  connect_bd_net -net axi_ad9361_adc_valid_q1 [get_bd_pins axi_ad9361/adc_valid_q1] [get_bd_pins overlay_top_0/i_Q1_valid]
   connect_bd_net -net axi_ad9361_dac_dma_irq [get_bd_pins axi_ad9361_dac_dma/irq] [get_bd_pins sys_concat_intc/In12]
   connect_bd_net -net axi_ad9361_dac_enable_i0 [get_bd_pins axi_ad9361/dac_enable_i0] [get_bd_pins axi_ad9361_dac_fifo/dout_enable_0]
   connect_bd_net -net axi_ad9361_dac_enable_i1 [get_bd_pins axi_ad9361/dac_enable_i1] [get_bd_pins axi_ad9361_dac_fifo/dout_enable_2]
@@ -1076,8 +998,8 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   connect_bd_net -net axi_ad9361_dac_valid_q1 [get_bd_pins axi_ad9361/dac_valid_q1] [get_bd_pins axi_ad9361_dac_fifo/dout_valid_3]
   connect_bd_net -net axi_ad9361_enable [get_bd_ports enable] [get_bd_pins axi_ad9361/enable]
   connect_bd_net -net axi_ad9361_gps_pps_irq [get_bd_pins axi_ad9361/gps_pps_irq] [get_bd_pins sys_concat_intc/In11]
-  connect_bd_net -net axi_ad9361_l_clk [get_bd_pins antsdr_pynq/i_clk] [get_bd_pins axi_ad9361/clk] [get_bd_pins axi_ad9361/l_clk] [get_bd_pins axi_ad9361_dac_fifo/dout_clk] [get_bd_pins util_ad9361_adc_fifo/din_clk] [get_bd_pins util_ad9361_divclk/clk]
-  connect_bd_net -net axi_ad9361_rst [get_bd_pins antsdr_pynq/i_rst] [get_bd_pins axi_ad9361/rst] [get_bd_pins axi_ad9361_dac_fifo/dout_rst] [get_bd_pins util_ad9361_adc_fifo/din_rst]
+  connect_bd_net -net axi_ad9361_l_clk [get_bd_pins axi_ad9361/clk] [get_bd_pins axi_ad9361/l_clk] [get_bd_pins axi_ad9361_dac_fifo/dout_clk] [get_bd_pins overlay_top_0/i_clk] [get_bd_pins util_ad9361_adc_fifo/din_clk] [get_bd_pins util_ad9361_divclk/clk]
+  connect_bd_net -net axi_ad9361_rst [get_bd_pins axi_ad9361/rst] [get_bd_pins axi_ad9361_dac_fifo/dout_rst] [get_bd_pins overlay_top_0/i_rst] [get_bd_pins util_ad9361_adc_fifo/din_rst]
   connect_bd_net -net axi_ad9361_tdd_sync_cntr [get_bd_ports tdd_sync_t] [get_bd_pins axi_ad9361/tdd_sync_cntr] [get_bd_pins util_ad9361_tdd_sync/sync_mode]
   connect_bd_net -net axi_ad9361_tx_clk_out_n [get_bd_ports tx_clk_out_n] [get_bd_pins axi_ad9361/tx_clk_out_n]
   connect_bd_net -net axi_ad9361_tx_clk_out_p [get_bd_ports tx_clk_out_p] [get_bd_pins axi_ad9361/tx_clk_out_p]
@@ -1099,6 +1021,14 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   connect_bd_net -net gpio_i_1 [get_bd_ports gpio_i] [get_bd_pins sys_ps7/GPIO_I]
   connect_bd_net -net gps_pps_1 [get_bd_ports gps_pps] [get_bd_pins axi_ad9361/gps_pps]
   connect_bd_net -net otg_vbusoc_1 [get_bd_ports otg_vbusoc] [get_bd_pins sys_logic_inv/Op1]
+  connect_bd_net -net overlay_top_0_o_I0_data [get_bd_pins overlay_top_0/o_I0_data] [get_bd_pins util_ad9361_adc_fifo/din_data_0]
+  connect_bd_net -net overlay_top_0_o_I0_valid [get_bd_pins overlay_top_0/o_I0_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_0]
+  connect_bd_net -net overlay_top_0_o_I1_data [get_bd_pins overlay_top_0/o_I1_data] [get_bd_pins util_ad9361_adc_fifo/din_data_2]
+  connect_bd_net -net overlay_top_0_o_I1_valid [get_bd_pins overlay_top_0/o_I1_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_2]
+  connect_bd_net -net overlay_top_0_o_Q0_data [get_bd_pins overlay_top_0/o_Q0_data] [get_bd_pins util_ad9361_adc_fifo/din_data_3]
+  connect_bd_net -net overlay_top_0_o_Q0_valid [get_bd_pins overlay_top_0/o_Q0_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_1]
+  connect_bd_net -net overlay_top_0_o_Q1_data [get_bd_pins overlay_top_0/o_Q1_data] [get_bd_pins util_ad9361_adc_fifo/din_data_1]
+  connect_bd_net -net overlay_top_0_o_Q1_valid [get_bd_pins overlay_top_0/o_Q1_valid] [get_bd_pins util_ad9361_adc_fifo/din_valid_3]
   connect_bd_net -net rom_sys_0_rom_data [get_bd_pins axi_sysid_0/sys_rom_data] [get_bd_pins rom_sys_0/rom_data]
   connect_bd_net -net rx_clk_in_n_1 [get_bd_ports rx_clk_in_n] [get_bd_pins axi_ad9361/rx_clk_in_n]
   connect_bd_net -net rx_clk_in_p_1 [get_bd_ports rx_clk_in_p] [get_bd_pins axi_ad9361/rx_clk_in_p]
