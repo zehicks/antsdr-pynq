@@ -1,6 +1,9 @@
 SD ?=
 SD_MSG := "ERROR: SD is not set. Please provide the path to your SD card mount directory."
 
+OL ?=
+OL_MSG := "ERROR: OL is not set. Please provide the name of your overlay directory."
+
 all: base pynq sdimg dtbo
 
 base:
@@ -36,7 +39,13 @@ sd:
 	sudo cp -f ./boards/e200/base/base.hwh $(SD)/root/home/xilinx/jupyter_notebooks/base
 	sudo cp -f ./boards/e200/base/pl.dtbo $(SD)/root/home/xilinx/jupyter_notebooks/base
 	sudo cp -f ./boards/e200/base/notebooks/pynq_iio.ipynb $(SD)/root/home/xilinx/jupyter_notebooks/base
-	
+
+overlay:
+	@[ "${OL}" ] || ( echo $(OL_MSG); exit 1 )
+	cp ./boards/e200/$(OL)/antsdre200/antsdre200.runs/impl_1/system_top.bit ./boards/e200/$(OL)/$(OL).bit
+	cp ./boards/e200/$(OL)/antsdre200/antsdre200.gen/sources_1/bd/system/hw_handoff/system.hwh ./boards/e200/$(OL)/$(OL).hwh
+	python3 ./boards/e200/utils/hwh_patch.py -f ./boards/e200/$(OL)/$(OL).hwh
+
 clean: clean/base clean/pynq
 
 clean/base:
