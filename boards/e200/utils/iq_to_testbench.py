@@ -8,10 +8,9 @@ import struct
 def convert_iq(filename=None, out=None, length=None, tone_freqs=None, fs=None, trim=0, scale=1, debug=0):
     # Load file if given
     if filename is not None:
-        IQ = np.fromfile(filename, dtype=np.int16)
-        # Separate I and Q
-        I = (IQ[::2]).tolist()
-        Q = (IQ[1::2]).tolist()
+        IQ_in = np.fromfile(filename, dtype=np.complex64)
+        I_in = np.real(IQ_in)
+        Q_in = np.imag(IQ_in)
     else:
         filename = "tones.dat"
         t = np.arange(0, 0.1, 1/fs)
@@ -21,50 +20,59 @@ def convert_iq(filename=None, out=None, length=None, tone_freqs=None, fs=None, t
         I = np.real(IQ).astype(np.int16).tolist()
         Q = np.imag(IQ).astype(np.int16).tolist()
 
-    if length is None:
-        I = I[int(trim):]
-        Q = Q[int(trim):]
-    else:
-        I = I[int(trim):int(trim)+length]
-        Q = Q[int(trim):int(trim)+length]
-        
-    # Scale up
-    I = [i * scale for i in I]
-    Q = [q * scale for q in Q]
-    
-    if (debug):
-        plt.plot(I)
-        plt.show()
-        
-    # Write data to file for MATLAB/Python model, skip first sample for FPGA reset in testbench
-    IQ = np.empty((len(I) + len(Q),), dtype=np.int16)
-    IQ[0::2] = I[:length]
-    IQ[1::2] = Q[:length]
-    
-    # Set out filename if given
+    # Set output filename if given
     if out is None:
         out_filename = filename.split('/')[-1].split('.')[0]
     else:
         out_filename = out
     
-    IQ_filename = "tb_" + out_filename + ".ic16"
-    IQ_file = open(IQ_filename, 'wb')
-    IQ_file.write(IQ)
-    IQ_file.close()
+    # Trim IQ file
+    if length is None:
+        length = IQ.size
+        I = I_in[int(trim):]
+        Q = Q_in[int(trim):]
+    else:
+        I = I_in[int(trim):int(trim)+length]
+        Q = Q_in[int(trim):int(trim)+length]
+        
+    # Convert to full-scale int16
+    I = float_to_int16(I)
+    Q = float_to_int16(Q)
+
+    # Scale down
+    I = np.left_shift(I, 4)
+    Q = np.left_shift(Q, 4)
+    I = np.left_shift(I, scale)
+    Q = np.left_shift(Q, scale)
 
     # Append leading 0 for FPGA reset in testbench
-    I.insert(0, 0)
-    Q.insert(0, 0)
+    np.insert(I, 0, 0)
+    np.insert(Q, 0, 0)
     
-    # Convert to  32-bit hex strings for testbench
+    # Debug plot
+    if (debug):
+        plt.plot(I)
+        plt.show()
+    
+    # Write data to binary file for MATLAB/Python model
+    IQ_interleaved = np.empty((2*length,), dtype=np.int16)
+    IQ_interleaved[0::2] = I[:length]
+    IQ_interleaved[1::2] = Q[:length]
+    
+    IQ_filename = "tb_" + out_filename + ".ic16"
+    IQ_outfile = open(IQ_filename, 'wb')
+    IQ_outfile.write(IQ_interleaved)
+    IQ_outfile.close()
+    
+    # Convert to 16-bit hex strings for testbench input
     I_txt = "\n".join(int16_to_hex_string(sample) for sample in I)
     Q_txt = "\n".join(int16_to_hex_string(sample) for sample in Q)
 
-    # Create out filenames
+    # Create hex output filenames
     I_filename = "tb_" + out_filename + "_I.hex"
     Q_filename = "tb_" + out_filename + "_Q.hex"
 
-    # Write data
+    # Write hex data
     I_file = open(I_filename, 'w')
     I_file.write(I_txt)
     I_file.close()
@@ -73,6 +81,15 @@ def convert_iq(filename=None, out=None, length=None, tone_freqs=None, fs=None, t
     Q_file.write(Q_txt)
     Q_file.close() 
     print(f"Done converting {filename}")
+
+
+def float_to_int16(floats):
+    floats = np.array(floats).astype(np.float32)
+    min = np.min(floats)
+    max = np.max(floats)
+    norm = (floats - min) / (max - min)
+    int16 = (np.round(norm * (2**15-1)) - (2**14)).astype(np.int16)
+    return int16
 
 
 def int16_to_hex_string(value):
@@ -88,7 +105,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--parameters', nargs='?', default=None, type=str, help="Comma-separated list of tones, followed by the sample rate")
     parser.add_argument('-l', '--length', nargs='?', default=None, type=int, help="Number of samples to write")
     parser.add_argument('-t', '--trim', nargs='?', default=0, type=int, help="Number of leading samples to trim")
-    parser.add_argument('-s', '--scale', nargs='?', default=1, type=float, help="Scale factor")
+    parser.add_argument('-s', '--scale', nargs='?', default=1, type=float, help="Scale factor, given as number of places to left-shift starting from 12 bits")
     parser.add_argument('-d', '--debug', action='store_true', help="Generate debug plot of signal")
     args = parser.parse_args()
     
