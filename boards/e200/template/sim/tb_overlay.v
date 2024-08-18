@@ -2,10 +2,10 @@
 
 module tb_overlay;
 
-    parameter FILE_PATH_I = "";
-    parameter FILE_PATH_Q = "";
-    parameter CLK_PERIOD = 4; // ns
-    parameter SAMPLE_CLK_PERIOD = 1; // ns
+    parameter FILE_PATH_I = "/home/hicksze1/antsdr-pynq/boards/e200/utils/tb_tones_I.hex";
+    parameter FILE_PATH_Q = "/home/hicksze1/antsdr-pynq/boards/e200/utils/tb_tones_Q.hex";
+    parameter CLK_PERIOD = 130; // ns
+    parameter SAMPLE_CLK_PERIOD = 520; // ns
 
     reg clk;
     reg reset_n;
@@ -48,6 +48,7 @@ module tb_overlay;
             eof_I = ($fscanf(file_I, "%h", hex_I));
             eof_Q = ($fscanf(file_Q, "%h", hex_Q));
         
+            // Create input data signals
             assign in_I = hex_I[15:0];
             assign in_Q = hex_Q[15:0];
 
@@ -62,14 +63,15 @@ module tb_overlay;
         $fclose(file_Q);
     end
 
-    reg [15:0] o_I0_data;
-    reg [15:0] o_Q0_data;
-    reg [15:0] o_I1_data;
-    reg [15:0] o_Q1_data;
-    reg o_I0_valid;
-    reg o_Q0_valid;
-    reg o_I1_valid;
-    reg o_Q1_valid;
+    wire [15:0] o_I0_data;
+    wire [15:0] o_Q0_data;
+    wire [15:0] o_I1_data;
+    wire [15:0] o_Q1_data;
+    wire o_I0_valid;
+    wire o_Q0_valid;
+    wire o_I1_valid;
+    wire o_Q1_valid;
+
 
     overlay_top_wrapper uut_overlay (
         .i_clk(clk),
