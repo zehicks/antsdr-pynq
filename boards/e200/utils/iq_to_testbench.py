@@ -1,26 +1,40 @@
 #!/usr/bin/python3
 
 import numpy as np
+import scipy.signal as sig
 import matplotlib.pyplot as plt
 import argparse
 import struct
 
-def convert_iq(in_file=None, out_file=None, out_dir=None, length=None, tone_freqs=None, fs=None, trim=0, scale=1, debug=0):
+def convert_iq(in_file=None, out_file=None, out_dir=None, waveform=None, length=None, params=None, fs=None, trim=0, scale=1, debug=0):
     # Load file if given
     if in_file is not None:
         IQ_in = np.fromfile(in_file, dtype=np.complex64)
 
-    # Otherwise, generate tones
-    else:
+    # Generate chirp
+    elif waveform == 'chirp':
+        in_file = "chirp.dat"
+        if length is None:
+            t = np.arange(0, 0.1, 1/fs)
+        else:
+            t = 0 + np.arange(0, length) * 1/fs
+        print(t.size)
+        f = np.linspace(params[0], params[1], t.size)
+        IQ_in = np.exp(1j*2*np.pi*f*t)
+        print(f"Generated chirp of duration {t[-1]} seconds")
+    
+    # Generate tones
+    elif waveform == 'tone':
         in_file = "tones.dat"
         if length is None:
             t = np.arange(0, 0.1, 1/fs)
         else:
             t = 0 + np.arange(0, length) * 1/fs
         IQ_in = np.zeros(t.size, dtype=np.complex64)
-        for f in tone_freqs:
+        for f in params:
             IQ_in += np.exp(1j*2*np.pi*f*t)
-    
+        print(f"Generated tones of duration {t[-1]} seconds")
+
     I = np.real(IQ_in)
     Q = np.imag(IQ_in)
     
@@ -114,20 +128,21 @@ def int16_to_hex_string(value):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Converts interleaved complex short to hex for modelsim imput")
     parser.add_argument('-if', '--input_file', nargs='?', default=None, type=str, help="Input IQ file")
+    parser.add_argument('-w', '--waveform', nargs='?', default=None, type=str, help="Waveform type, from {tone, chirp}")
+    parser.add_argument('-wp', '--waveform_params', nargs='?', default=None, type=str, help="Comma-separated list of tones or chirp start/stop, followed by the sample rate")
     parser.add_argument('-of', '--output_file', nargs='?', default=None, type=str, help="output file name")
     parser.add_argument('-od', '--output_dir', nargs='?', default=None, type=str, help="output directory")
-    parser.add_argument('-p', '--parameters', nargs='?', default=None, type=str, help="Comma-separated list of tones, followed by the sample rate")
     parser.add_argument('-l', '--length', nargs='?', default=None, type=int, help="Number of samples to write")
     parser.add_argument('-t', '--trim', nargs='?', default=0, type=int, help="Number of leading samples to trim")
     parser.add_argument('-s', '--scale', nargs='?', default=1, type=float, help="Scale factor, given as number of places to left-shift starting from 12 bits")
     parser.add_argument('-d', '--debug', action='store_true', help="Generate debug plot of signal")
     args = parser.parse_args()
     
-    if args.parameters is not None:
-        tone_freqs = [int(item) for item in args.parameters.split(',')]
-        fs = tone_freqs.pop()
+    if args.waveform_params is not None:
+        waveform_params = [int(item) for item in args.waveform_params.split(',')]
+        fs = waveform_params.pop()
     else:
-        tone_freqs = []
+        waveform_params = []
         fs = None
     
-    convert_iq(args.input_file, args.output_file, args.output_dir, args.length, tone_freqs, fs, args.trim, args.scale, args.debug)
+    convert_iq(args.input_file, args.output_file, args.output_dir, args.waveform, args.length, waveform_params, fs, args.trim, args.scale, args.debug)
