@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy.signal as sig
+from scipy.integrate import cumtrapz
 import matplotlib.pyplot as plt
 import argparse
 import struct
@@ -20,7 +21,8 @@ def convert_iq(in_file=None, out_file=None, out_dir=None, waveform=None, length=
             t = 0 + np.arange(0, length) * 1/fs
         print(t.size)
         f = np.linspace(params[0], params[1], t.size)
-        IQ_in = np.exp(1j*2*np.pi*f*t)
+        phase = cumtrapz(f, t, initial=0)
+        IQ_in = np.exp(1j*2*np.pi*phase)
         print(f"Generated chirp of duration {t[-1]} seconds")
     
     # Generate tones
