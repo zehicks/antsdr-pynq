@@ -2,6 +2,7 @@
 boards/e200/*/antsdre200/*
 boards/e200/*/*.hwh
 boards/e200/*/*.bit
+boards/e200/*/sd/
 boards/e200/petalinux_bsp/hardware_project/*.xsa
 !boards/e200/*/antsdre200/Makefile
 !boards/e200/*/antsdre200/*.v
