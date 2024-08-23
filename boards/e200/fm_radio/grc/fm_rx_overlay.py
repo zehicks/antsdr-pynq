@@ -5,18 +5,17 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: fm_rx
+# Title: fm_rx_overlay
 # GNU Radio version: 3.10.7.0
 
 from packaging.version import Version as StrictVersion
 from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio import analog
-import math
 from gnuradio import audio
-from gnuradio import filter
-from gnuradio.filter import firdes
+from gnuradio import blocks
 from gnuradio import gr
+from gnuradio.filter import firdes
 from gnuradio.fft import window
 import sys
 import signal
@@ -30,12 +29,12 @@ from PyQt5 import QtCore
 
 
 
-class fm_rx(gr.top_block, Qt.QWidget):
+class fm_rx_overlay(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "fm_rx", catch_exceptions=True)
+        gr.top_block.__init__(self, "fm_rx_overlay", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("fm_rx")
+        self.setWindowTitle("fm_rx_overlay")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -53,7 +52,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "fm_rx")
+        self.settings = Qt.QSettings("GNU Radio", "fm_rx_overlay")
 
         try:
             if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
@@ -66,6 +65,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.tx_freq = tx_freq = 100
         self.samp_rate = samp_rate = int(1.92e6)
         self.fm_dev_hz = fm_dev_hz = 75e3
         self.center_freq = center_freq = int(89.7e6)
@@ -79,20 +79,9 @@ class fm_rx(gr.top_block, Qt.QWidget):
         self._center_freq_range = Range(int(88.1e6), int(108.1e6), 200e3, int(89.7e6), 200)
         self._center_freq_win = RangeWidget(self._center_freq_range, self.set_center_freq, "'center_freq'", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._center_freq_win)
-        self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
-                interpolation=1,
-                decimation=M1,
-                taps=[],
-                fractional_bw=0)
-        self.low_pass_filter_0 = filter.fir_filter_fff(
-            M2,
-            firdes.low_pass(
-                1,
-                (samp_rate/(M1*M2)),
-                16e3,
-                4e3,
-                window.WIN_HAMMING,
-                6.76))
+        self._tx_freq_range = Range(0, 10000, 1000, 100, 200)
+        self._tx_freq_win = RangeWidget(self._tx_freq_range, self.set_tx_freq, "'tx_freq'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._tx_freq_win)
         self.iio_pluto_source_0 = iio.fmcomms2_source_fc32('ip:192.168.2.99' if 'ip:192.168.2.99' else iio.get_pluto_uri(), [True, True], 32768)
         self.iio_pluto_source_0.set_len_tag_key('packet_len')
         self.iio_pluto_source_0.set_frequency(center_freq)
@@ -103,8 +92,11 @@ class fm_rx(gr.top_block, Qt.QWidget):
         self.iio_pluto_source_0.set_rfdc(True)
         self.iio_pluto_source_0.set_bbdc(True)
         self.iio_pluto_source_0.set_filter_params('Auto', '', 0, 0)
+        self.blocks_multiply_const_xx_0 = blocks.multiply_const_ff(2**16, 1)
+        self.blocks_complex_to_real_0 = blocks.complex_to_real(1)
+        self.blocks_complex_to_imag_0 = blocks.complex_to_imag(1)
+        self.blocks_add_xx_0 = blocks.add_vff(1)
         self.audio_sink_0 = audio.sink(48000, '', True)
-        self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate/M1)/(2*math.pi*fm_dev_hz)))
         self.analog_fm_deemph_0 = analog.fm_deemph(fs=(samp_rate/(M1*M2)), tau=(75e-6))
 
 
@@ -112,35 +104,40 @@ class fm_rx(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.analog_fm_deemph_0, 0), (self.audio_sink_0, 0))
-        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.low_pass_filter_0, 0))
-        self.connect((self.iio_pluto_source_0, 0), (self.rational_resampler_xxx_0, 0))
-        self.connect((self.low_pass_filter_0, 0), (self.analog_fm_deemph_0, 0))
-        self.connect((self.rational_resampler_xxx_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.analog_fm_deemph_0, 0))
+        self.connect((self.blocks_complex_to_imag_0, 0), (self.blocks_multiply_const_xx_0, 0))
+        self.connect((self.blocks_complex_to_real_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.blocks_multiply_const_xx_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.iio_pluto_source_0, 0), (self.blocks_complex_to_imag_0, 0))
+        self.connect((self.iio_pluto_source_0, 0), (self.blocks_complex_to_real_0, 0))
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "fm_rx")
+        self.settings = Qt.QSettings("GNU Radio", "fm_rx_overlay")
         self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
 
         event.accept()
 
+    def get_tx_freq(self):
+        return self.tx_freq
+
+    def set_tx_freq(self, tx_freq):
+        self.tx_freq = tx_freq
+
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate/self.M1)/(2*math.pi*self.fm_dev_hz)))
         self.iio_pluto_source_0.set_samplerate(self.samp_rate)
-        self.low_pass_filter_0.set_taps(firdes.low_pass(1, (self.samp_rate/(self.M1*self.M2)), 16e3, 4e3, window.WIN_HAMMING, 6.76))
 
     def get_fm_dev_hz(self):
         return self.fm_dev_hz
 
     def set_fm_dev_hz(self, fm_dev_hz):
         self.fm_dev_hz = fm_dev_hz
-        self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate/self.M1)/(2*math.pi*self.fm_dev_hz)))
 
     def get_center_freq(self):
         return self.center_freq
@@ -154,20 +151,17 @@ class fm_rx(gr.top_block, Qt.QWidget):
 
     def set_M2(self, M2):
         self.M2 = M2
-        self.low_pass_filter_0.set_taps(firdes.low_pass(1, (self.samp_rate/(self.M1*self.M2)), 16e3, 4e3, window.WIN_HAMMING, 6.76))
 
     def get_M1(self):
         return self.M1
 
     def set_M1(self, M1):
         self.M1 = M1
-        self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate/self.M1)/(2*math.pi*self.fm_dev_hz)))
-        self.low_pass_filter_0.set_taps(firdes.low_pass(1, (self.samp_rate/(self.M1*self.M2)), 16e3, 4e3, window.WIN_HAMMING, 6.76))
 
 
 
 
-def main(top_block_cls=fm_rx, options=None):
+def main(top_block_cls=fm_rx_overlay, options=None):
 
     if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
         style = gr.prefs().get_string('qtgui', 'style', 'raster')
