@@ -42,13 +42,13 @@ sd:
 
 overlay:
 	@[ "${OL}" ] || ( echo $(OL_MSG); exit 1 )
-	cp ./boards/e200/$(OL)/antsdre200/antsdre200.runs/impl_1/system_top.bit ./boards/e200/$(OL)/$(OL).bit
-	cp ./boards/e200/$(OL)/antsdre200/antsdre200.gen/sources_1/bd/system/hw_handoff/system.hwh ./boards/e200/$(OL)/$(OL).hwh
+	cp -f ./boards/e200/$(OL)/antsdre200/antsdre200.runs/impl_1/system_top.bit ./boards/e200/$(OL)/$(OL).bit
+	cp -f ./boards/e200/$(OL)/antsdre200/antsdre200.gen/sources_1/bd/system/hw_handoff/system.hwh ./boards/e200/$(OL)/$(OL).hwh
 	python3 ./boards/e200/utils/hwh_patch.py -f ./boards/e200/$(OL)/$(OL).hwh
 	mkdir -p ./boards/e200/$(OL)/sd
-	cp ./boards/e200/$(OL)/$(OL).bit ./boards/e200/$(OL)/sd/
-	cp ./boards/e200/$(OL)/$(OL).hwh ./boards/e200/$(OL)/sd/
-	cp ./boards/e200/$(OL)/notebooks/* ./boards/e200/$(OL)/sd/	
+	cp -f ./boards/e200/$(OL)/$(OL).bit ./boards/e200/$(OL)/sd/
+	cp -f ./boards/e200/$(OL)/$(OL).hwh ./boards/e200/$(OL)/sd/
+	cp -f ./boards/e200/$(OL)/notebooks/* ./boards/e200/$(OL)/sd/	
 
 clean: clean/base clean/pynq
 
