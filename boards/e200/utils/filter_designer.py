@@ -3,7 +3,7 @@
 import numpy as np
 import scipy.signal as sig
 import matplotlib.pyplot as plt
-
+import argparse
 
 def to_dB(array):
     """ Converts an input amplitude array to decibels
@@ -96,8 +96,27 @@ def plot_mag_response(h, Fs):
     
     plt.plot(w/np.pi/2*Fs, to_dB(H), "r")
     plt.grid(True)
-    plt.title("Magnitude Reponse")
+    plt.title(f"Magnitude Reponse\nN = {len(h)-1}")
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Magnitude (dB)")
     plt.xlim(0, Fs/2)
     plt.show()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Converts interleaved complex short to hex for modelsim imput")
+    parser.add_argument('-fs', '--sampling_freq', nargs='?', default=1, type=float, help="Sampling frequency (Hz)")
+    parser.add_argument('-fpass', '--passband_freq', type=float, help="Passband frequency (Hz)")
+    parser.add_argument('-fstop', '--stopband_freq', type=float, help="Stopband frequency (Hz)")
+    parser.add_argument('-apass', '--passband_ripple', type=float, help="Passband ripple (dB)")
+    parser.add_argument('-astop', '--stopband_atten', type=float, help="Stopband attenuation(dB)")
+    parser.add_argument('-n', '--order', nargs='?', default=None, type=float, help="Filter order")
+    
+    args = parser.parse_args()
+
+    if args.order is None:
+        h = fir_design_optimal(args.sampling_freq, args.passband_freq, args.stopband_freq, args.passband_ripple, args.stopband_atten)
+    else:
+        h = fir_design(args.sampling_freq, args.passband_freq, args.stopband_freq, args.passband_ripple, args.stopband_atten, args.order)
+    
+    plot_mag_response(h, args.sampling_freq)
