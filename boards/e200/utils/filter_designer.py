@@ -85,7 +85,7 @@ def fir_design_optimal(Fs, Fpass, Fstop, Ap, As, Nmin = 1, Nmax = 1000):
     return None
 
 
-def plot_mag_response(h, Fs):
+def plot_mag_response(h, Fs, ax=None, show=True, **kwargs):
     """ Plots a filter magnitude response
 
     Args:
@@ -94,13 +94,20 @@ def plot_mag_response(h, Fs):
     """
     (w, H) = sig.freqz(h)
     
-    plt.plot(w/np.pi/2*Fs, to_dB(H), "r")
-    plt.grid(True)
-    plt.title(f"Magnitude Reponse\nN = {len(h)-1}")
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Magnitude (dB)")
-    plt.xlim(0, Fs/2)
-    plt.show()
+    if ax is None:
+        _, ax = plt.subplots()
+    
+    ax.plot(w/np.pi/2*Fs, to_dB(H), **kwargs)
+    ax.grid(True)
+    ax.set_title(f"Magnitude Reponse\nN = {len(h)-1}")
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Magnitude (dB)")
+    ax.set_xlim(0, Fs/2)
+    ax.legend()
+    if show:
+        plt.show()
+    
+    return ax
 
 
 if __name__ == '__main__':
