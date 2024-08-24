@@ -22,3 +22,4 @@ PYNQ-PRIO/device_tree_overlays/dtc-1.4.4/
 *.fc32
 *.ic16
 *.hex
+**/__pycache__
