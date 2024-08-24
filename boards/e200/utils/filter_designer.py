@@ -103,7 +103,8 @@ def plot_mag_response(h, Fs, ax=None, show=True, **kwargs):
     ax.set_xlabel("Frequency (Hz)")
     ax.set_ylabel("Magnitude (dB)")
     ax.set_xlim(0, Fs/2)
-    ax.legend()
+    if 'label' in kwargs:
+        ax.legend()
     if show:
         plt.show()
     
