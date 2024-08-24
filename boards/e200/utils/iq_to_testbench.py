@@ -7,7 +7,22 @@ import matplotlib.pyplot as plt
 import argparse
 import struct
 
-def convert_iq(in_file=None, out_file=None, out_dir=None, waveform=None, length=None, params=None, fs=None, trim=0, scale=1, debug=0):
+def convert_iq(in_file=None, out_file=None, out_dir=None, waveform=None, length=None, params=None, fs=None, trim=0, scale=1, debug=False):
+    """ Converts floating-point IQ values into fixed-point and writes a hex file for Verilog testbench input
+
+    Args:
+        in_file (str, optional): Input IQ file to convert, stored as np.fc32. Defaults to None.
+        out_file (str, optional): Output file name. Defaults to None.
+        out_dir (str, optional): Output directory path. Defaults to None.
+        waveform (str, optional): Waveform type to generate, from ["chirp", "tones"]. Defaults to None.
+        length (int, optional): Number of samples to write. Defaults to None.
+        params (list[int], optional): List of parameters for waveform generation. Defaults to None.
+        fs (int, optional): Sampling Frequency. Defaults to None.
+        trim (int, optional): The number of leading samples to remove from an input IQ file. Defaults to 0.
+        scale (int, optional): Scale factor to apply to output signal. Defaults to 1.
+        debug (bool, optional): Debug flag for generating a plot of the signal. Defaults to 0.
+    """
+
     # Load file if given
     if in_file is not None:
         IQ_in = np.fromfile(in_file, dtype=np.complex64)
@@ -106,6 +121,14 @@ def convert_iq(in_file=None, out_file=None, out_dir=None, waveform=None, length=
 
 
 def float_to_int16(floats):
+    """ Converts float values to int16
+
+    Args:
+        floats (ArrayLike): Array of floating-point values
+
+    Returns:
+        int16: Array of int16 values
+    """
     floats = np.array(floats).astype(np.float32)
     min = np.min(floats)
     max = np.max(floats)
@@ -122,6 +145,14 @@ def float_to_int16(floats):
 
 
 def int16_to_hex_string(value):
+    """ Converts an int16 value into a hex string
+
+    Args:
+        value (np.int16): Value to convert
+
+    Returns:
+        str: Hex string representation of input value
+    """
     if value < 0:
         value += 2**16
     return f"{value:04X}"

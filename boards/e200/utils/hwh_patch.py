@@ -2,6 +2,11 @@ import fileinput
 import argparse
 
 def apply_patch(filename):
+    """ Applies a patch to a Vivado-generated .hwh file to correct mismatched port directions on the Ethernet component
+
+    Args:
+        filename (str): Input .hwh filename
+    """
     with open(filename, 'r') as file:
         text = file.read()
 
