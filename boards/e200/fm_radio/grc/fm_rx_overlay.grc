@@ -102,27 +102,6 @@ blocks:
     coordinate: [192, 12.0]
     rotation: 0
     state: enabled
-- name: tx_freq
-  id: variable_qtgui_range
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: ''
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '0'
-    step: '1000'
-    stop: '10000'
-    value: '100'
-    widget: counter_slider
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [688, 28.0]
-    rotation: 0
-    state: true
 - name: analog_fm_deemph_0
   id: analog_fm_deemph
   parameters:
@@ -140,49 +119,6 @@ blocks:
     coordinate: [728, 220.0]
     rotation: 0
     state: enabled
-- name: analog_nbfm_tx_0
-  id: analog_nbfm_tx
-  parameters:
-    affinity: ''
-    alias: ''
-    audio_rate: samp_rate
-    comment: ''
-    fh: '-1.0'
-    max_dev: 5e3
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    quad_rate: samp_rate
-    tau: 75e-6
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [352, 476.0]
-    rotation: 0
-    state: disabled
-- name: analog_sig_source_x_0
-  id: analog_sig_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    amp: '1'
-    comment: ''
-    freq: tx_freq
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    offset: '0'
-    phase: '0'
-    samp_rate: samp_rate
-    showports: 'False'
-    type: float
-    waveform: analog.GR_COS_WAVE
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [96, 468.0]
-    rotation: 0
-    state: disabled
 - name: audio_sink_0
   id: audio_sink
   parameters:
@@ -250,6 +186,28 @@ blocks:
     coordinate: [328, 184.0]
     rotation: 0
     state: enabled
+- name: blocks_file_source_0
+  id: blocks_file_source
+  parameters:
+    affinity: ''
+    alias: ''
+    begin_tag: pmt.PMT_NIL
+    comment: ''
+    file: /home/hicksze1/antsdr-pynq/boards/e200/fm_radio/sim/iq_files/fm_1920kHz.fc32
+    length: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    repeat: 'True'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [168, 444.0]
+    rotation: 0
+    state: true
 - name: blocks_multiply_const_xx_0
   id: blocks_multiply_const_xx
   parameters:
@@ -291,9 +249,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 452.0]
+    coordinate: [456, 420.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: iio_pluto_source_0
   id: iio_pluto_source
   parameters:
@@ -325,14 +283,43 @@ blocks:
     coordinate: [56, 156.0]
     rotation: 0
     state: enabled
+- name: qtgui_sink_x_0
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 588.0]
+    rotation: 0
+    state: disabled
 
 connections:
 - [analog_fm_deemph_0, '0', audio_sink_0, '0']
-- [analog_nbfm_tx_0, '0', iio_pluto_sink_0, '0']
-- [analog_sig_source_x_0, '0', analog_nbfm_tx_0, '0']
 - [blocks_add_xx_0, '0', analog_fm_deemph_0, '0']
 - [blocks_complex_to_imag_0, '0', blocks_multiply_const_xx_0, '0']
 - [blocks_complex_to_real_0, '0', blocks_add_xx_0, '0']
+- [blocks_file_source_0, '0', iio_pluto_sink_0, '0']
+- [blocks_file_source_0, '0', qtgui_sink_x_0, '0']
 - [blocks_multiply_const_xx_0, '0', blocks_add_xx_0, '1']
 - [iio_pluto_source_0, '0', blocks_complex_to_imag_0, '0']
 - [iio_pluto_source_0, '0', blocks_complex_to_real_0, '0']
