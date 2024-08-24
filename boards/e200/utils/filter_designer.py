@@ -72,23 +72,26 @@ def fir_design_optimal(Fs, Fpass, Fstop, Ap, As, Nmin = 1, Nmax = 1000):
         Fstop (float): Stopband frequency
         Ap (float): Passband amplitude
         As (float): Stopband amplitude
-        Nmin(int): Minimum filter order
-        Nmax(int): Maximum filter order
+        Nmin (int): Minimum filter order
+        Nmax (int): Maximum filter order
 
     Returns:
         ArrayLike: Generated filter impulse response
     """
     for N in range(Nmin, Nmax):
-        print("Trying N=%d" % N)
         (h, w, H, Rp, Rs, Hp_min, Hp_max, Hs_max) = fir_design(Fs, Fpass, Fstop, Ap, As, N)
         if (-to_dB(Rp) <= Ap) and (-to_dB(Rs) >= As):
-            return N
-
+            return h
     return None
 
 
-def plot_freq_response(h, Fs):
-    
+def plot_mag_response(h, Fs):
+    """ Plots a filter magnitude response
+
+    Args:
+        h (ArrayLike): Filter impuse response
+        Fs (float): Sampling frequency
+    """
     (w, H) = sig.freqz(h)
     
     plt.plot(w/np.pi/2*Fs, to_dB(H), "r")
@@ -97,3 +100,4 @@ def plot_freq_response(h, Fs):
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Magnitude (dB)")
     plt.xlim(0, Fs/2)
+    plt.show()
