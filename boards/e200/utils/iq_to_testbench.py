@@ -17,9 +17,9 @@ def convert_iq(in_file=None, out_file=None, out_dir=None, waveform=None, length=
         waveform (str, optional): Waveform type to generate, from ["chirp", "tones"]. Defaults to None.
         length (int, optional): Number of samples to write. Defaults to None.
         params (list[int], optional): List of parameters for waveform generation. Defaults to None.
-        fs (int, optional): Sampling Frequency. Defaults to None.
+        fs (float, optional): Sampling Frequency. Defaults to None.
         trim (int, optional): The number of leading samples to remove from an input IQ file. Defaults to 0.
-        scale (int, optional): Scale factor to apply to output signal. Defaults to 1.
+        scale (float, optional): Scale factor to apply to output signal. Defaults to 1.
         debug (bool, optional): Debug flag for generating a plot of the signal. Defaults to 0.
     """
 
