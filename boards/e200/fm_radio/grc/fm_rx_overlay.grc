@@ -102,6 +102,27 @@ blocks:
     coordinate: [192, 12.0]
     rotation: 0
     state: enabled
+- name: tx_atten
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '1'
+    stop: '0'
+    value: '0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [664, 12.0]
+    rotation: 0
+    state: enabled
 - name: analog_fm_deemph_0
   id: analog_fm_deemph
   parameters:
@@ -207,7 +228,7 @@ blocks:
     bus_structure: null
     coordinate: [168, 444.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: blocks_multiply_const_xx_0
   id: blocks_multiply_const_xx
   parameters:
@@ -231,7 +252,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    attenuation1: '40.0'
+    attenuation1: tx_atten
     bandwidth: int(500e3)
     buffer_size: '32768'
     comment: ''
@@ -312,9 +333,39 @@ blocks:
     coordinate: [456, 588.0]
     rotation: 0
     state: disabled
+- name: qtgui_sink_x_1
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: float
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 316.0]
+    rotation: 0
+    state: true
 
 connections:
 - [analog_fm_deemph_0, '0', audio_sink_0, '0']
+- [analog_fm_deemph_0, '0', qtgui_sink_x_1, '0']
 - [blocks_add_xx_0, '0', analog_fm_deemph_0, '0']
 - [blocks_complex_to_imag_0, '0', blocks_multiply_const_xx_0, '0']
 - [blocks_complex_to_real_0, '0', blocks_add_xx_0, '0']
