@@ -74,7 +74,7 @@ def fi_fir(x_float, h_float, x_q=(1,15), h_q=(1,15), y_q=(1,15), M=1, real=False
 
         # Calculate current filter output after a sample has been delivered to each phase
         if phase == M:
-            accum_test = np.sum([np.dot(z[i], h_poly[i]) for i in range(n_phases)])
+            accum = np.sum([np.dot(z[i], h_poly[i]) for i in range(n_phases)])
             y[y_idx] = accum.resize(y_q)
             y_idx += 1
             phase = 0
