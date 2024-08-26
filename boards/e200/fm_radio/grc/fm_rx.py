@@ -27,6 +27,7 @@ from gnuradio import eng_notation
 from gnuradio import iio
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
+import sip
 
 
 
@@ -84,6 +85,24 @@ class fm_rx(gr.top_block, Qt.QWidget):
                 decimation=M1,
                 taps=[],
                 fractional_bw=0)
+        self.qtgui_sink_x_0 = qtgui.sink_f(
+            1024, #fftsize
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            (samp_rate/M1), #bw
+            "", #name
+            True, #plotfreq
+            True, #plotwaterfall
+            True, #plottime
+            True, #plotconst
+            None # parent
+        )
+        self.qtgui_sink_x_0.set_update_time(1.0/10)
+        self._qtgui_sink_x_0_win = sip.wrapinstance(self.qtgui_sink_x_0.qwidget(), Qt.QWidget)
+
+        self.qtgui_sink_x_0.enable_rf_freq(False)
+
+        self.top_layout.addWidget(self._qtgui_sink_x_0_win)
         self.low_pass_filter_0 = filter.fir_filter_fff(
             M2,
             firdes.low_pass(
@@ -113,6 +132,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         ##################################################
         self.connect((self.analog_fm_deemph_0, 0), (self.audio_sink_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.low_pass_filter_0, 0))
+        self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_sink_x_0, 0))
         self.connect((self.iio_pluto_source_0, 0), (self.rational_resampler_xxx_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.analog_fm_deemph_0, 0))
         self.connect((self.rational_resampler_xxx_0, 0), (self.analog_quadrature_demod_cf_0, 0))
@@ -134,6 +154,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate/self.M1)/(2*math.pi*self.fm_dev_hz)))
         self.iio_pluto_source_0.set_samplerate(self.samp_rate)
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, (self.samp_rate/(self.M1*self.M2)), 16e3, 4e3, window.WIN_HAMMING, 6.76))
+        self.qtgui_sink_x_0.set_frequency_range(0, (self.samp_rate/self.M1))
 
     def get_fm_dev_hz(self):
         return self.fm_dev_hz
@@ -163,6 +184,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         self.M1 = M1
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate/self.M1)/(2*math.pi*self.fm_dev_hz)))
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, (self.samp_rate/(self.M1*self.M2)), 16e3, 4e3, window.WIN_HAMMING, 6.76))
+        self.qtgui_sink_x_0.set_frequency_range(0, (self.samp_rate/self.M1))
 
 
 

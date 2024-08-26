@@ -33,28 +33,16 @@ options:
     state: enabled
 
 blocks:
-- name: M1
+- name: M
   id: variable
   parameters:
     comment: ''
-    value: '5'
+    value: '40'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [520, 12.0]
-    rotation: 0
-    state: true
-- name: M2
-  id: variable
-  parameters:
-    comment: ''
-    value: '8'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [592, 12.0]
+    coordinate: [528, 12.0]
     rotation: 0
     state: true
 - name: center_freq
@@ -69,7 +57,7 @@ blocks:
     start: int(88.1e6)
     step: 200e3
     stop: int(108.1e6)
-    value: int(89.7e6)
+    value: int(92.3e6)
     widget: counter_slider
   states:
     bus_sink: false
@@ -120,7 +108,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 12.0]
+    coordinate: [608, 12.0]
     rotation: 0
     state: enabled
 - name: analog_fm_deemph_0
@@ -131,13 +119,13 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    samp_rate: samp_rate/(M1*M2)
+    samp_rate: samp_rate/M
     tau: 75e-6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 220.0]
+    coordinate: [712, 220.0]
     rotation: 0
     state: enabled
 - name: audio_sink_0
@@ -228,7 +216,7 @@ blocks:
     bus_structure: null
     coordinate: [168, 444.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_const_xx_0
   id: blocks_multiply_const_xx
   parameters:
@@ -272,7 +260,7 @@ blocks:
     bus_structure: null
     coordinate: [456, 420.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: iio_pluto_source_0
   id: iio_pluto_source
   parameters:
@@ -338,7 +326,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    bw: samp_rate
+    bw: samp_rate/M
     comment: ''
     fc: '0'
     fftsize: '1024'
