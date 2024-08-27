@@ -110,7 +110,7 @@ blocks:
     bus_structure: null
     coordinate: [608, 12.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: analog_fm_deemph_0
   id: analog_fm_deemph
   parameters:
