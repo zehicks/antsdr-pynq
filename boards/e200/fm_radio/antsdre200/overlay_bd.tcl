@@ -247,6 +247,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_2x_0, and set properties
   set fir_decimate_2x_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_2x_0 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {true} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 -0.010768378367562352, -0.0018394810292252813, 0.006233651499042951,\
@@ -287,6 +288,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_2x_1, and set properties
   set fir_decimate_2x_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_2x_1 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {true} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 -0.010768378367562352, -0.0018394810292252813, 0.006233651499042951,\
@@ -327,6 +329,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_4x_0, and set properties
   set fir_decimate_4x_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_4x_0 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {true} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 -7.74325027621753e-06, -0.05189997187628614, -4.1301339330400186e-07,\
@@ -366,6 +369,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_4x_1, and set properties
   set fir_decimate_4x_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_4x_1 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {true} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 -7.74325027621753e-06, -0.05189997187628614, -4.1301339330400186e-07,\
@@ -405,6 +409,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_5x_I0, and set properties
   set fir_decimate_5x_I0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_5x_I0 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {true} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 0.017926080259475487,  -0.12035211259138348,  -0.036208554701390075, \
@@ -436,6 +441,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_5x_I1, and set properties
   set fir_decimate_5x_I1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_5x_I1 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {false} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 0.017926080259475487,  -0.12035211259138348,  -0.036208554701390075, \
@@ -445,11 +451,12 @@ proc create_root_design { parentCell } {
 0.09350671504844729,  -0.06234473425445337,  -0.07581046107316944, \
 6.815402536415538e-06,  0.05052481847108319,  0.025311459222197356, \
 -0.036208554701390075,  -0.12035211259138348,  0.017926080259475487} \
-   CONFIG.Coefficient_Fractional_Bits {16} \
+   CONFIG.Coefficient_Fractional_Bits {0} \
    CONFIG.Coefficient_Sets {1} \
    CONFIG.Coefficient_Sign {Signed} \
    CONFIG.Coefficient_Structure {Inferred} \
-   CONFIG.Coefficient_Width {16} \
+   CONFIG.Coefficient_Width {32} \
+   CONFIG.Data_Width {16} \
    CONFIG.Decimation_Rate {5} \
    CONFIG.Filter_Architecture {Systolic_Multiply_Accumulate} \
    CONFIG.Filter_Type {Decimation} \
@@ -457,7 +464,7 @@ proc create_root_design { parentCell } {
    CONFIG.Interpolation_Rate {1} \
    CONFIG.Number_Channels {1} \
    CONFIG.Output_Rounding_Mode {Convergent_Rounding_to_Even} \
-   CONFIG.Output_Width {16} \
+   CONFIG.Output_Width {15} \
    CONFIG.Quantization {Quantize_Only} \
    CONFIG.RateSpecification {Frequency_Specification} \
    CONFIG.Sample_Frequency {1.92} \
@@ -467,6 +474,7 @@ proc create_root_design { parentCell } {
   # Create instance: fir_decimate_5x_Q0, and set properties
   set fir_decimate_5x_Q0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:fir_compiler:7.2 fir_decimate_5x_Q0 ]
   set_property -dict [ list \
+   CONFIG.BestPrecision {true} \
    CONFIG.Clock_Frequency {7.68} \
    CONFIG.CoefficientVector {\
 0.017926080259475487,  -0.12035211259138348,  -0.036208554701390075, \
@@ -507,11 +515,12 @@ proc create_root_design { parentCell } {
 0.09350671504844729,  -0.06234473425445337,  -0.07581046107316944, \
 6.815402536415538e-06,  0.05052481847108319,  0.025311459222197356, \
 -0.036208554701390075,  -0.12035211259138348,  0.017926080259475487} \
-   CONFIG.Coefficient_Fractional_Bits {16} \
+   CONFIG.Coefficient_Fractional_Bits {0} \
    CONFIG.Coefficient_Sets {1} \
    CONFIG.Coefficient_Sign {Signed} \
    CONFIG.Coefficient_Structure {Inferred} \
-   CONFIG.Coefficient_Width {16} \
+   CONFIG.Coefficient_Width {32} \
+   CONFIG.Data_Width {16} \
    CONFIG.Decimation_Rate {5} \
    CONFIG.Filter_Architecture {Systolic_Multiply_Accumulate} \
    CONFIG.Filter_Type {Decimation} \
@@ -519,7 +528,7 @@ proc create_root_design { parentCell } {
    CONFIG.Interpolation_Rate {1} \
    CONFIG.Number_Channels {1} \
    CONFIG.Output_Rounding_Mode {Convergent_Rounding_to_Even} \
-   CONFIG.Output_Width {16} \
+   CONFIG.Output_Width {15} \
    CONFIG.Quantization {Quantize_Only} \
    CONFIG.RateSpecification {Frequency_Specification} \
    CONFIG.Sample_Frequency {1.92} \
@@ -648,7 +657,6 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
-  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -660,4 +668,6 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
+
+common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
