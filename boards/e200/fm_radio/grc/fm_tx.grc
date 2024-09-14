@@ -45,7 +45,7 @@ blocks:
     start: int(88.1e6)
     step: 200e3
     stop: int(108.1e6)
-    value: int(92.3e6)
+    value: int(102.7e6)
     widget: counter_slider
   states:
     bus_sink: false
@@ -141,7 +141,7 @@ blocks:
     bus_structure: null
     coordinate: [48, 164.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_wavfile_source_0
   id: blocks_wavfile_source
   parameters:
@@ -159,7 +159,7 @@ blocks:
     bus_structure: null
     coordinate: [72, 308.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: iio_pluto_sink_0
   id: iio_pluto_sink
   parameters:

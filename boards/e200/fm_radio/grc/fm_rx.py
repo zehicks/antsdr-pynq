@@ -69,7 +69,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         ##################################################
         self.samp_rate = samp_rate = int(1.92e6)
         self.fm_dev_hz = fm_dev_hz = 75e3
-        self.center_freq = center_freq = int(89.7e6)
+        self.center_freq = center_freq = int(88.1e6)
         self.M2 = M2 = 8
         self.M1 = M1 = 5
 
@@ -77,7 +77,7 @@ class fm_rx(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
 
-        self._center_freq_range = Range(int(88.1e6), int(108.1e6), 200e3, int(89.7e6), 200)
+        self._center_freq_range = Range(int(88.1e6), int(108.1e6), 200e3, int(88.1e6), 200)
         self._center_freq_win = RangeWidget(self._center_freq_range, self.set_center_freq, "'center_freq'", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._center_freq_win)
         self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(

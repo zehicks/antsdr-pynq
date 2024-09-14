@@ -69,7 +69,7 @@ blocks:
     start: int(88.1e6)
     step: 200e3
     stop: int(108.1e6)
-    value: int(89.7e6)
+    value: int(88.1e6)
     widget: counter_slider
   states:
     bus_sink: false
@@ -132,9 +132,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [520, 228.0]
+    coordinate: [528, 228.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: audio_sink_0
   id: audio_sink
   parameters:
@@ -253,9 +253,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 204.0]
+    coordinate: [320, 204.0]
     rotation: 0
-    state: true
+    state: enabled
 
 connections:
 - [analog_fm_deemph_0, '0', audio_sink_0, '0']

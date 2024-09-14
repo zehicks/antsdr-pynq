@@ -13,6 +13,7 @@ from packaging.version import Version as StrictVersion
 from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio import analog
+from gnuradio import blocks
 from gnuradio import filter
 from gnuradio.filter import firdes
 from gnuradio import gr
@@ -69,18 +70,18 @@ class fm_tx(gr.top_block, Qt.QWidget):
         self.tone_freq = tone_freq = 1000
         self.samp_rate = samp_rate = 48000
         self.quad_rate = quad_rate = int(576e3)
-        self.center_freq = center_freq = int(92.3e6)
+        self.center_freq = center_freq = int(102.7e6)
 
         ##################################################
         # Blocks
         ##################################################
 
+        self._center_freq_range = Range(int(88.1e6), int(108.1e6), 200e3, int(102.7e6), 200)
+        self._center_freq_win = RangeWidget(self._center_freq_range, self.set_center_freq, "'center_freq'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._center_freq_win)
         self._tone_freq_range = Range(0, 10000, 1, 1000, 200)
         self._tone_freq_win = RangeWidget(self._tone_freq_range, self.set_tone_freq, "'tone_freq'", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._tone_freq_win)
-        self._center_freq_range = Range(int(88.1e6), int(108.1e6), 200e3, int(92.3e6), 200)
-        self._center_freq_win = RangeWidget(self._center_freq_range, self.set_center_freq, "'center_freq'", "counter_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._center_freq_win)
         self.qtgui_sink_x_0 = qtgui.sink_c(
             1024, #fftsize
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -115,7 +116,7 @@ class fm_tx(gr.top_block, Qt.QWidget):
         self.iio_pluto_sink_0.set_samplerate(quad_rate)
         self.iio_pluto_sink_0.set_attenuation(0, 10.0)
         self.iio_pluto_sink_0.set_filter_params('Auto', '', 0, 0)
-        self.analog_sig_source_x_0 = analog.sig_source_f(samp_rate, analog.GR_COS_WAVE, tone_freq, 1, 0, 0)
+        self.blocks_wavfile_source_0 = blocks.wavfile_source('/home/hicksze1/Downloads/StarWars60.wav', True)
         self.analog_nbfm_tx_0 = analog.nbfm_tx(
         	audio_rate=samp_rate,
         	quad_rate=quad_rate,
@@ -129,7 +130,7 @@ class fm_tx(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.analog_nbfm_tx_0, 0), (self.low_pass_filter_0, 0))
-        self.connect((self.analog_sig_source_x_0, 0), (self.analog_nbfm_tx_0, 0))
+        self.connect((self.blocks_wavfile_source_0, 0), (self.analog_nbfm_tx_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.iio_pluto_sink_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.qtgui_sink_x_0, 0))
 
@@ -147,14 +148,12 @@ class fm_tx(gr.top_block, Qt.QWidget):
 
     def set_tone_freq(self, tone_freq):
         self.tone_freq = tone_freq
-        self.analog_sig_source_x_0.set_frequency(self.tone_freq)
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
         self.qtgui_sink_x_0.set_frequency_range(0, self.samp_rate)
 
     def get_quad_rate(self):
